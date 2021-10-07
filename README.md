@@ -42,3 +42,8 @@ Para executar o aplicativo utilizando a CLI:
 ```shell
 dotnet run
 ```
+
+## Novas features desenvolvidas
+
+- Inclusão da seção de filmes
+- Adaptação do menu inicial
