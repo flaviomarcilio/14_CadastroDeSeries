@@ -4,163 +4,250 @@ namespace aplicativo
 {
     class Program
     {
-        static SerieRepositorio repositorio = new SerieRepositorio();
+        static SerieRepositorio serieRepositorio = new SerieRepositorio();
+		static FilmeRepositorio filmeRepositorio = new FilmeRepositorio();
         static void Main(string[] args)
         {
-            string opcaoUsuario = ObterOpcaoUsuario();
+			string opcao = menuPrincipal();
 
-			while (opcaoUsuario.ToUpper() != "X")
+			while (opcao != "X")
 			{
-				switch (opcaoUsuario)
+				string opcaoUsuario = ObterOpcaoUsuario(opcao);
+
+				while (opcaoUsuario != "X")
 				{
-					case "1":
-						ListarSeries();
-						break;
-					case "2":
-						InserirSerie();
-						break;
-					case "3":
-						AtualizarSerie();
-						break;
-					case "4":
-						ExcluirSerie();
-						break;
-					case "5":
-						VisualizarSerie();
-						break;
-					case "C":
-						Console.Clear();
-						break;
+					switch (opcaoUsuario)
+					{
+						case "1":
+							Listar(opcao);
+							break;
+						case "2":
+							Inserir(opcao);
+							break;
+						case "3":
+							Atualizar(opcao);
+							break;
+						case "4":
+							Excluir(opcao);
+							break;
+						case "5":
+							Visualizar(opcao);
+							break;
+						case "C":
+							Console.Clear();
+							break;
 
-					default:
-						throw new ArgumentOutOfRangeException();
+						default:
+							throw new ArgumentOutOfRangeException();
+					}
+					opcaoUsuario = ObterOpcaoUsuario(opcao);
 				}
-
-				opcaoUsuario = ObterOpcaoUsuario();
+				opcao = menuPrincipal();
 			}
 
 			Console.WriteLine("Obrigado por utilizar nossos serviços.");
 			Console.ReadLine();
+		}
+
+        private static void Excluir(string opcao)
+        {
+            Console.Write("Digite o ID {0}: ", opcao == "F" ? "do Filme" : "da Série");
+            int indice = int.Parse(Console.ReadLine());
+
+            if (opcao == "S")
+            {
+                serieRepositorio.Exclui(indice);
+            }
+            else
+            {
+                filmeRepositorio.Exclui(indice);
+            }
         }
 
-        private static void ExcluirSerie()
+        private static void Visualizar(string opcao)
 		{
-			Console.Write("Digite o id da série: ");
-			int indiceSerie = int.Parse(Console.ReadLine());
+			Console.Write("Digite o ID {0}: ", opcao == "F" ? "do Filme" : "da Série");
 
-			repositorio.Exclui(indiceSerie);
+            int indice = int.Parse(Console.ReadLine());
+
+            if (opcao == "S")
+            {
+                var serie = serieRepositorio.RetornaPorId(indice);
+                Console.WriteLine(serie);
+            }
+            else
+            {
+                var filme = filmeRepositorio.RetornaPorId(indice);
+                Console.WriteLine(filme);
+            }
 		}
 
-        private static void VisualizarSerie()
-		{
-			Console.Write("Digite o id da série: ");
-			int indiceSerie = int.Parse(Console.ReadLine());
+        private static void Atualizar(string opcao)
+        {
+            Console.Write("Digite o ID {0}: ", opcao == "F" ? "do Filme" : "da Série");
+            int indice = int.Parse(Console.ReadLine());
 
-			var serie = repositorio.RetornaPorId(indiceSerie);
+            foreach (int i in Enum.GetValues(typeof(Genero)))
+            {
+                Console.WriteLine("{0} - {1}", i, Enum.GetName(typeof(Genero), i));
+            }
 
-			Console.WriteLine(serie);
-		}
+            Console.Write("Digite o gênero entre as opções acima: ");
+            int entradaGenero = int.Parse(Console.ReadLine());
 
-        private static void AtualizarSerie()
-		{
-			Console.Write("Digite o id da série: ");
-			int indiceSerie = int.Parse(Console.ReadLine());
+            Console.Write("Digite o Título {0}: ", opcao == "F" ? "do Filme" : "da Série");
+            string entradaTitulo = Console.ReadLine();
 
-			// https://docs.microsoft.com/pt-br/dotnet/api/system.enum.getvalues?view=net-5.0
-			// https://docs.microsoft.com/pt-br/dotnet/api/system.enum.getname?view=net-5.0
-			foreach (int i in Enum.GetValues(typeof(Genero)))
-			{
-				Console.WriteLine("{0}-{1}", i, Enum.GetName(typeof(Genero), i));
-			}
-			Console.Write("Digite o gênero entre as opções acima: ");
-			int entradaGenero = int.Parse(Console.ReadLine());
+            Console.Write("Digite o Ano de {0}: ", opcao == "F" ? "lançamento do Filme" : "início da Série");
+            int entradaAno = int.Parse(Console.ReadLine());
 
-			Console.Write("Digite o Título da Série: ");
-			string entradaTitulo = Console.ReadLine();
+            Console.Write("Digite a descrição {0}: ", opcao == "F" ? "do Filme" : "da Série");
+            string entradaDescricao = Console.ReadLine();
 
-			Console.Write("Digite o Ano de Início da Série: ");
-			int entradaAno = int.Parse(Console.ReadLine());
-
-			Console.Write("Digite a Descrição da Série: ");
-			string entradaDescricao = Console.ReadLine();
-
-			Serie atualizaSerie = new Serie(id: indiceSerie,
-										genero: (Genero)entradaGenero,
-										titulo: entradaTitulo,
-										ano: entradaAno,
-										descricao: entradaDescricao);
-
-			repositorio.Atualiza(indiceSerie, atualizaSerie);
-		}
-        private static void ListarSeries()
-		{
-			Console.WriteLine("Listar séries");
-
-			var lista = repositorio.Lista();
-
-			if (lista.Count == 0)
-			{
-				Console.WriteLine("Nenhuma série cadastrada.");
-				return;
-			}
-
-			foreach (var serie in lista)
-			{
-                var excluido = serie.retornaExcluido();
+            if (opcao == "S")
+            {
+                Serie atualizaSerie = new Serie(id: indice,
+                                                genero: (Genero)entradaGenero,
+                                                titulo: entradaTitulo,
+                                                ano: entradaAno,
+                                                descricao: entradaDescricao);
                 
-				Console.WriteLine("#ID {0}: - {1} {2}", serie.retornaId(), serie.retornaTitulo(), (excluido ? "*Excluído*" : ""));
-			}
-		}
+                serieRepositorio.Atualiza(indice, atualizaSerie);
+            }
+            else{
+                Console.Write("Digite a avaliação do Filme: ");
+                float entradaRate = float.Parse(Console.ReadLine());
 
-        private static void InserirSerie()
-		{
-			Console.WriteLine("Inserir nova série");
+                Filme atualizaFilme = new Filme(id: indice,
+                                                genero: (Genero)entradaGenero,
+                                                titulo: entradaTitulo,
+                                                descricao: entradaDescricao,
+                                                ano: entradaAno,
+                                                rate: entradaRate);
 
-			// https://docs.microsoft.com/pt-br/dotnet/api/system.enum.getvalues?view=net-5.0
-			// https://docs.microsoft.com/pt-br/dotnet/api/system.enum.getname?view=net-5.0
-			foreach (int i in Enum.GetValues(typeof(Genero)))
-			{
-				Console.WriteLine("{0}-{1}", i, Enum.GetName(typeof(Genero), i));
-			}
-			Console.Write("Digite o gênero entre as opções acima: ");
-			int entradaGenero = int.Parse(Console.ReadLine());
+                filmeRepositorio.Atualiza(indice, atualizaFilme);
+            }
+        }
 
-			Console.Write("Digite o Título da Série: ");
-			string entradaTitulo = Console.ReadLine();
+        private static void Listar(string opcao)
+        {
+            Console.WriteLine("Catálogo de {0}", opcao == "F" ? "Filmes" : "Séries");
 
-			Console.Write("Digite o Ano de Início da Série: ");
-			int entradaAno = int.Parse(Console.ReadLine());
+            if (opcao == "S")
+            {
+                var series = serieRepositorio.Lista();
 
-			Console.Write("Digite a Descrição da Série: ");
-			string entradaDescricao = Console.ReadLine();
+                if (series.Count == 0)
+                {
+                    Console.WriteLine("Nenhuma série cadastrada.");
+                    return;
+                }
+                foreach (var serie in series)
+                {
+                    var excluido = serie.retornaExcluido();
+                    if (!excluido) {
+                        Console.WriteLine("#ID {0}: {1}", serie.retornaId(), serie.retornaTitulo());
+                    }
+                }
+            }
+            else
+            {
+                var filmes = filmeRepositorio.Lista();
 
-			Serie novaSerie = new Serie(id: repositorio.ProximoId(),
-										genero: (Genero)entradaGenero,
-										titulo: entradaTitulo,
-										ano: entradaAno,
-										descricao: entradaDescricao);
+                if (filmes.Count == 0)
+                {
+                    Console.WriteLine("Nenhum filme cadastrado.");
+                    return;
+                }
+                foreach (var filme in filmes)
+                {
+                    var excluido = filme.retornaExcluido();
+                    if (!excluido) {
+                        Console.WriteLine("#ID {0}: {1}", filme.retornaId(), filme.retornaTitulo());
+                    }
+                }
+            }
+        }
 
-			repositorio.Insere(novaSerie);
-		}
+        private static void Inserir(string opcao)
+        {
+            Console.WriteLine("Inserir {0}", opcao == "F" ? "novo Filme" : "nova Série");
 
-        private static string ObterOpcaoUsuario()
-		{
-			Console.WriteLine();
-			Console.WriteLine("DIO Séries a seu dispor!!!");
-			Console.WriteLine("Informe a opção desejada:");
+            foreach (int i in Enum.GetValues(typeof(Genero)))
+            {
+                Console.WriteLine("{0} - {1}", i, Enum.GetName(typeof(Genero), i));
+            }
+            Console.Write("Digite o gênero entre as opções acima: ");
+            int entradaGenero = int.Parse(Console.ReadLine());
 
-			Console.WriteLine("1- Listar séries");
-			Console.WriteLine("2- Inserir nova série");
-			Console.WriteLine("3- Atualizar série");
-			Console.WriteLine("4- Excluir série");
-			Console.WriteLine("5- Visualizar série");
-			Console.WriteLine("C- Limpar Tela");
-			Console.WriteLine("X- Sair");
-			Console.WriteLine();
+            Console.Write("Digite o Título {0}: ", opcao == "F" ? "do Filme" : "da Série");
+            string entradaTitulo = Console.ReadLine();
 
-			string opcaoUsuario = Console.ReadLine().ToUpper();
-			Console.WriteLine();
-			return opcaoUsuario;
-		}
+            Console.Write("Digite o Ano de {0}: ", opcao == "F" ? "lançamento do Filme" : "início da Série");
+            int entradaAno = int.Parse(Console.ReadLine());
+
+            Console.Write("Digite a descrição {0}: ", opcao == "F" ? "do Filme" : "da Série");
+            string entradaDescricao = Console.ReadLine();
+
+            if (opcao == "S")
+            {
+
+                Serie novaSerie = new Serie(id: serieRepositorio.ProximoId(),
+                                            genero: (Genero)entradaGenero,
+                                            titulo: entradaTitulo,
+                                            ano: entradaAno,
+                                            descricao: entradaDescricao);
+                
+                serieRepositorio.Insere(novaSerie);
+            }
+            else
+            {
+                Console.Write("Digite a avaliação do Filme: ");
+                float entradaRate = float.Parse(Console.ReadLine());
+
+                Filme novoFilme = new Filme(id: filmeRepositorio.ProximoId(),
+                                            genero: (Genero)entradaGenero,
+                                            titulo: entradaTitulo,
+                                            descricao: entradaDescricao,
+                                            ano: entradaAno,
+                                            rate: entradaRate);
+                filmeRepositorio.Insere(novoFilme);
+            }
+        }
+
+		private static string menuPrincipal()
+        {
+            Console.WriteLine();
+            Console.WriteLine("**** Catálogo de Filmes e Séries ****");
+            Console.WriteLine("Informe a seção desejada:");
+            Console.WriteLine("F - Filmes");
+            Console.WriteLine("S - Séries");
+            Console.WriteLine("X - sair");
+            Console.WriteLine();
+
+            string opcao = Console.ReadLine().ToUpper();
+            Console.WriteLine();
+            return opcao;
+        }
+
+        private static string ObterOpcaoUsuario(string opcao)
+        {
+            Console.WriteLine();
+            Console.WriteLine("**** Catálogo de Filmes e Séries ****");
+            Console.WriteLine("O que você deseja fazer:");
+            
+            Console.WriteLine("1 - Listar {0}", opcao == "F" ? "Filme" : "Série");
+            Console.WriteLine("2 - Inserir {0}", opcao == "F" ? "Filme" : "Série");
+            Console.WriteLine("3 - Atualizar {0}", opcao == "F" ? "Filme" : "Série");
+            Console.WriteLine("4 - Excluir {0}", opcao == "F" ? "Filme" : "Série");
+            Console.WriteLine("5 - Visualizar {0}", opcao == "F" ? "Filme" : "Série");
+            Console.WriteLine("C - Limpar tela");
+            Console.WriteLine("X - Voltar ao menu principal");
+            Console.WriteLine();
+
+            string opcaoUsuario = Console.ReadLine().ToUpper();
+            Console.WriteLine();
+            return opcaoUsuario;
+        }
     }
 }
